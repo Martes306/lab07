@@ -20,7 +20,7 @@ class TestSimpleBankAccount {
     private BankAccount bankAccount;
 
     private static final int AMOUNT = 100;
-    private static final int ACCEPTABLE_MESSAGE_LENGTH = 10;
+    private static final int ACCEPTABLE_MESSAGE_LENGTH = 10;    
 
     /**
      * Configuration step: this is performed BEFORE each test.
