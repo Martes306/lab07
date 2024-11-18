@@ -63,11 +63,12 @@ public final class Transformers {
      * @param <O> output elements type
      */
     public static <I, O> List<O> transform(final Iterable<I> base, final Function<I, O> transformer) {
-        final var result = new ArrayList<O>();
-        for (final I input : Objects.requireNonNull(base, "The base iterable cannot be null")) {
-            result.add(transformer.call(input));
-        }
-        return result;
+        return flattenTransform(base, new Function<I, Collection<? extends O>>() {
+            @Override
+            public Collection<? extends O> call(I input) {
+                return List.of(transformer.call(input));
+            }
+        });
     }
 
     /**
@@ -78,7 +79,7 @@ public final class Transformers {
      * produce a flat list, thus obtaining
      * {@code [1, 2, 3, 4, 5]}.
      * <b>NOTE:</b> this function is a special flattenTransform whose input is an
-     * iterable of collections,
+     * iterable of collections, 
      * and whose function simply returns each collection (identity).
      *
      * @param base the collections on which to operate
@@ -86,18 +87,14 @@ public final class Transformers {
      * @param <I> type of the collection elements
      */
     public static <I> List<? extends I> flatten(final Iterable<? extends Collection<? extends I>> base) {
-        final var result = new ArrayList<I>(); 
-        for (final var input : base){
-            result.addAll(input);
-        }
-        return result;
+        return flattenTransform(base, Function.identity()); 
     }
 
     /**
      * A function that applies a test to each element of an {@link Iterable},
      * returning a list containing only the
      * elements that pass the test.
-     * For instance, {@code [1, 2, 3, 4, 5]} could use {@code select} to filter only
+     * For instance, {@code [1, 2, 3, 4, 5]} could use {@code select} to filter only 
      * the odd numbers, thus obtaining
      * {@code [1, 3, 5]}.
      * <b>NOTE:</b> this function is a special flattenTransform whose function
@@ -111,7 +108,14 @@ public final class Transformers {
      * @param <I> elements type
      */
     public static <I> List<I> select(final Iterable<I> base, final Function<I, Boolean> test) {
-        return null;
+        return flattenTransform(base, new Function<>() {
+
+            @Override
+            public Collection<? extends I> call(I input) {
+                return test.call(input) ? List.of(input) : List.of();
+            }
+            
+        });
     }
 
     /**
@@ -131,6 +135,13 @@ public final class Transformers {
      * @param <I> elements type
      */
     public static <I> List<I> reject(final Iterable<I> base, final Function<I, Boolean> test) {
-        return null;
+        return flattenTransform(base, new Function<>() {
+
+            @Override
+            public Collection<? extends I> call(I input) {
+                return test.call(input) ? List.of() : List.of(input);
+            }
+            
+        });
     }
 }
